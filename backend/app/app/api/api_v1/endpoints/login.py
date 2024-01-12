@@ -6,7 +6,7 @@ from .....app import crud, schemas
 from .....app.core.config import settings
 from .....app.core import security
 from .....app.api import deps
-from ....crud import crud_user
+from ....crud import crud_users
 from ....schemas.token import Token
 
 
@@ -17,12 +17,12 @@ router = APIRouter(prefix="/login", tags=["login"], dependencies=[Depends(deps.g
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(deps.get_db)
 ):
-    user = crud_user.user.authenticate_user(
+    user = crud_users.user.authenticate_user(
         db, email=form_data.username, password=form_data.password
     )
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    elif crud_user.user.disabled(user):
+    elif crud_users.user.disabled(user):
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(

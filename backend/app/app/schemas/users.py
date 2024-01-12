@@ -1,20 +1,16 @@
 from typing import Optional, List
 from datetime import date
-from .events import Event
-from .unavailability import Unavailability
-
+from .audio import Audio
+from .books import Book
 from pydantic import BaseModel, EmailStr
 
 
 class UserBase(BaseModel):
     email: EmailStr
-    username: Optional[str]
     Firstname: Optional[str]
     Lastname: Optional[str]
-    D_O_B: Optional[date]
     country_of_residence: Optional[str]
-    phone: Optional[str]
-    is_admin: Optional[bool] = None
+  
 
 
 # Properties to receive via API on creation
@@ -30,9 +26,9 @@ class UserUpdate(UserBase):
 
 class UserInDBBase(UserBase):
     user_id: int
-    disabled: bool
-    event: List[Event] = []
-    unavailabilities: List[Unavailability] = []
+    book: List[Book] = []
+    audio: List[Audio] = []
+ 
 
     class Config:
         orm_mode = True

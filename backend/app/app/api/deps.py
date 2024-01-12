@@ -6,7 +6,7 @@ from xml.dom import ValidationErr
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 
-from ...app.crud import crud_user
+from ..crud import crud_users
 from ...app.models import models
 from ..schemas.token import TokenPayload
 from ...app.core import security
@@ -41,7 +41,7 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = crud_user.user.get(db, id=token_data.sub)
+    user = crud_users.user.get(db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -50,7 +50,7 @@ async def get_current_user(
 async def get_current_active_user(
     current_user: models.Users = Depends(get_current_user),
 ) -> models.Users:
-    if crud_user.user.disabled(current_user):
+    if crud_users.user.disabled(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
@@ -58,7 +58,7 @@ async def get_current_active_user(
 async def get_current_active_admin(
     current_user: models.Users = Depends(get_current_user),
 ) -> models.Users:
-    if not crud_user.user.is_admin(current_user):
+    if not crud_users.user.is_admin(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )

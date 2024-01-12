@@ -2,10 +2,10 @@ from typing import Any, Dict, Optional, Union, List
 
 from sqlalchemy.orm import Session
 
-from ...app.core.security import get_password_hash, verify_password
-from ...app.crud.base import CRUDBase
-from ...app.models import models
-from ...app.schemas.users import UserCreate, UserUpdate
+from ..core.security import get_password_hash, verify_password
+from .base import CRUDBase
+from ..models import models
+from ..schemas.users import UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
@@ -15,13 +15,9 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
     def create(self, db: Session, *, obj_in: UserCreate) -> models.Users:
         db_user = models.Users(
             email=obj_in.email,
-            username=obj_in.username,
             Firstname=obj_in.Firstname,
             Lastname=obj_in.Lastname,
-            D_O_B=obj_in.D_O_B,
             country_of_residence=obj_in.country_of_residence,
-            phone=obj_in.phone,
-            is_admin=obj_in.is_admin,
             hashed_password=get_password_hash(obj_in.password),
         )
         db.add(db_user)
@@ -64,11 +60,12 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
             return None
         return user
 
-    def disabled(self, user: models.Users) -> bool:
-        return user.disabled
+# Not using his functionality for now
+    # def disabled(self, user: models.Users) -> bool:
+    #     return user.disabled
 
-    def is_admin(self, user: models.Users) -> bool:
-        return user.is_admin
+    # def is_admin(self, user: models.Users) -> bool:
+    #     return user.is_admin
 
 
 user = CRUDUser(models.Users)
