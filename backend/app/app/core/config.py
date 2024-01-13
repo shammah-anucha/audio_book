@@ -1,6 +1,7 @@
 import secrets
 from typing import Any, Dict, List, Optional, Union
-
+import pymysql, mysql
+import utils
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
 
 
@@ -9,10 +10,10 @@ class Settings(BaseSettings):
     SECRET_KEY = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 8
+  
 
-    SQLALCHEMY_DATABASE_URL: Optional[
-        PostgresDsn
-    ] = "postgresql://shammah2:secret2@localhost/planar_db"
+    SQLALCHEMY_DATABASE_URL: Optional[str] = utils.DB.SQLALCHEMY_DATABASE_URL
+
 
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
@@ -24,7 +25,17 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    PROJECT_NAME: str = "Planar"
+    PROJECT_NAME: str = "Audio Book"
 
 
 settings = Settings()
+
+
+
+# # Establish a connection to the database
+# connection = mysql.connector.connect(**db_config)
+
+# # Create a cursor object to execute SQL queries
+# cursor = connection.cursor()
+
+

@@ -47,3 +47,7 @@ def send_email_background(
     )
     fm = FastMail(conf)
     background_tasks.add_task(fm.send_message, message, template_name="email.html")
+
+
+class DB:
+    SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
