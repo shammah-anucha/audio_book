@@ -1,35 +1,27 @@
-from datetime import time, date
-
+from typing import Optional
 from pydantic import BaseModel
-
+from fastapi import UploadFile
 
 class BookBase(BaseModel):
     book_name: str
-    book_file: str
-
-
+    # book_file: Optional[UploadFile] = None
 
 class BookCreate(BookBase):
-    name: str
-
+    pass
 
 class BookUpdate(BookBase):
     pass
 
-
-class BookInDBBase(BookBase):
+class BookInDBBase(BaseModel):
     book_id: int
-    # user_id: int
+    book_name: str
+    # book_file: Optional[str]  # Assuming you want to store file paths in the database
 
     class Config:
         orm_mode = True
 
-
-# Properties to return to client
 class Book(BookInDBBase):
     pass
 
-
-# Properties properties stored in DB
 class BookInDB(BookInDBBase):
     pass

@@ -1,8 +1,6 @@
 import secrets
-from typing import Any, Dict, List, Optional, Union
-import pymysql, mysql
-import utils
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from typing import List, Optional, Union
+from pydantic import AnyHttpUrl, BaseSettings, validator
 
 
 class Settings(BaseSettings):
@@ -12,7 +10,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 8
   
 
-    SQLALCHEMY_DATABASE_URL: Optional[str] = utils.DB.SQLALCHEMY_DATABASE_URL
+    SQLALCHEMY_DATABASE_URL: Optional[str] = "mysql+pymysql://root:AkunnA25@127.0.0.1/Audio_Book"
 
 
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
