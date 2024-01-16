@@ -1,11 +1,16 @@
 from typing import List
 from PyPDF2 import PdfReader
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from ..crud import crud_book
+from ..schemas import books
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from fastapi import File, UploadFile
 from .base import CRUDBase
 from ..models import models
 from ..schemas.books import BookCreate, BookUpdate
+from fastapi.responses import StreamingResponse
+
 
 
 class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
@@ -48,13 +53,25 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
         return db.query(models.Books).filter(models.Books.book_id == id).first()
     
 
-    def download_book(self, db: Session, id: int):
+    def download_book(self, db: Session, book_id: int):
+        db_book = crud_book.Book.get_book_id(db=db, id=book_id)
+        if not db_book:
+            raise HTTPException(status_code=404, detail="Book not found")
+        
+        book_file = db.query(models.Books.book_file).filter(models.Books.book_id == book_id).first()
+        book_name = db.query(models.Books.book_name).filter(models.Books.book_id == book_id).first()
 
-        book_file = db.query(models.Books.book_file).filter(models.Books.book_id == id).first()
-        book_name = db.query(models.Books.book_name).filter(models.Books.book_id == id).first()
-        print(book_file)
-        print(book_name)
-        return FileResponse(book_file, filename=book_name)
+        if not book_file or not book_name:
+            raise HTTPException(status_code=404, detail="Book file or name not found")
+
+        content: bytes = book_file[0]  # Assuming book_file is a bytes-like object
+        filename: str = book_name[0]    # Assuming book_name is a string
+
+        def generate():
+            yield content
+
+        return StreamingResponse(content=generate(), media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
         
         
         # text = ''
