@@ -10,6 +10,8 @@ from .base import CRUDBase
 from ..models import models
 from ..schemas.books import BookCreate, BookUpdate
 from fastapi.responses import StreamingResponse
+import pdfplumber
+from io import BytesIO
 
 
 
@@ -71,6 +73,46 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
             yield content
 
         return StreamingResponse(content=generate(), media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+    
+
+
+
+    def extract_text_from_pdf_in_db(self, db: Session, book_id: int, page_number: int):
+        # Retrieve the PDF from the database
+        pdf_record = db.query(models.Books.book_file).filter(models.Books.book_id == book_id).first()
+
+        if not pdf_record:
+            print("PDF not found")
+            return
+
+        # Get the binary content from the database
+        pdf_content = BytesIO(pdf_record[0])
+
+
+        # Use pdfplumber to extract text from the specified page
+        with pdfplumber.open(pdf_content) as pdf:
+            if 0 < page_number <= len(pdf.pages):
+                # Get the specified page
+                page = pdf.pages[page_number - 1]
+
+                # Extract text from the page
+                text = page.extract_text()
+
+                # Print the text on the command line
+                return text
+
+            else:
+                return "Invalid page number"
+
+# # Example usage in your FastAPI endpoint
+# @router.get("/extract-text/{pdf_id}/{page_number}")
+# def extract_text_from_pdf_endpoint(pdf_id: int, page_number: int, db: Session = Depends(get_db)):
+#     extract_text_from_pdf_in_db(db, pdf_id, page_number)
+#     return {"message": "Text extraction complete, check command line output."}
+
+
+
+
 
         
         

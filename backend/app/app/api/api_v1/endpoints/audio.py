@@ -4,6 +4,11 @@ from ....schemas import audio
 from ... import deps
 from typing import List
 from sqlalchemy.orm import Session
+from fastapi.responses import StreamingResponse
+from gtts import gTTS
+from io import BytesIO
+from ....crud import crud_audio
+
 
 
 router = APIRouter(
@@ -18,6 +23,15 @@ def create_Audio(Audio: audio.AudioCreate, db: Session = Depends(deps.get_db)):
 
 # works
 @router.get("/", response_model=List[audio.Audio])
-def read_Audios(skip: int = 0, limit: int = 100, db: Session = Depends(deps.get_db)):
-    roster = crud_audio.Audio.get_multi_Audios(db, skip=skip, limit=limit)
-    return roster
+# def read_Audios(book_id: int, page_number: int, db: Session = Depends(deps.get_db)): 
+#     pass 
+
+def text_to_audio(book_id: int, page_number: int, db: Session = Depends(deps.get_db)):
+
+    # Convert text to audio
+    audio_data = crud_audio.Audio.get_audio(book_id=book_id, page_number=page_number,db=db)
+
+    # Provide audio as a download using StreamingResponse
+    return StreamingResponse(
+        BytesIO(audio_data), media_type="audio/mpeg", headers={"Content-Disposition": f'attachment; filename="audio.mp3"'}
+    )
