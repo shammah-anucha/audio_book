@@ -73,11 +73,13 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
             yield content
 
         return StreamingResponse(content=generate(), media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"'})
-    
 
 
+    def remove_extra(text):
+        
+        pass
 
-    def extract_text_from_pdf_in_db(self, db: Session, book_id: int, page_number: int):
+    def extract_text_from_pdf_in_db(self, db: Session, book_id: int):
         # Retrieve the PDF from the database
         pdf_record = db.query(models.Books.book_file).filter(models.Books.book_id == book_id).first()
 
@@ -91,18 +93,43 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
 
         # Use pdfplumber to extract text from the specified page
         with pdfplumber.open(pdf_content) as pdf:
-            if 0 < page_number <= len(pdf.pages):
-                # Get the specified page
-                page = pdf.pages[page_number - 1]
+            text_list = []
+            step_size = 20
+            # total_pages =Book.remove_extra(pdf)
+            total_pages = len(pdf.pages)
 
-                # Extract text from the page
-                text = page.extract_text()
 
-                # Print the text on the command line
-                return text
 
-            else:
-                return "Invalid page number"
+            for start_page in range(1, total_pages, step_size):
+                end_page = min(start_page + step_size - 1, total_pages)
+                
+                text = ""
+                for page_number in range(start_page, end_page + 1):
+                    page = pdf.pages[page_number - 1] 
+                    text += page.extract_text()
+                text_list.append(text)
+        
+        # print(len(text_list))
+        # print(text_list)
+
+                
+        return text_list
+
+
+            # Extracting a single text
+            # ----------------------------
+            # if 0 < page_number <= len(pdf.pages):
+            #     # Get the specified page
+            #     page = pdf.pages[page_number - 1]
+
+            #     # Extract text from the page
+            #     text = page.extract_text()
+
+            #     # Print the text on the command line
+            #     return text
+
+            # else:
+            #     return "Invalid page number"
 
 # # Example usage in your FastAPI endpoint
 # @router.get("/extract-text/{pdf_id}/{page_number}")

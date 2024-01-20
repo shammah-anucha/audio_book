@@ -7,21 +7,40 @@ from .base import CRUDBase
 from ..models import models
 from ..schemas.audio import AudioCreate, AudioUpdate
 from . import crud_book
-from gtts import gTTS
+from gtts import gTTS, gTTSError
 from io import BytesIO
-import gtts
+import os
+import time
 from gtts.tokenizer import pre_processors
 
 class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
 
-    
-    def get_audio(self, book_id: int, page_number: int, db: Session):
-        text = crud_book.Book.extract_text_from_pdf_in_db(book_id=book_id, page_number=page_number,db=db)
-        tts = gTTS(text=text, lang='en', slow=False,)
-        # pre_processors.tone_marks()
-        audio_bytes = BytesIO()
-        tts.write_to_fp(audio_bytes)
-        return audio_bytes.getvalue()
+    def create_audio_stream(self, text_list: List[str]):
+        audio_streams = []
+
+        for i, text in enumerate(text_list, start=1):
+            try:
+                tts = gTTS(text=text, lang='en', slow=False)
+                audio_bytes = BytesIO()
+                tts.write_to_fp(audio_bytes)
+                audio_bytes.seek(0)
+                audio_streams.append(audio_bytes)
+            except gTTSError as e:
+                if "429" in str(e):
+                    # Retry after a delay
+                    print(f"Rate limited. Retrying after 10 seconds.")
+                    time.sleep(10)  # Introduce an artificial wait
+                else:
+                    # Handle other errors
+                    print(f"Error: {e}")
+                    break
+        return audio_streams
+
+    def get_audio_stream(self, book_id: int, db: Session):
+        text_list = crud_book.Book.extract_text_from_pdf_in_db(book_id=book_id, db=db)
+        audio_streams = Audio.create_audio_stream(text_list)
+
+        return audio_streams
 
         
 

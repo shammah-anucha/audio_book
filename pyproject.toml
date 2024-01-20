@@ -29,6 +29,7 @@ mysql-connector-python = "^8.2.0"
 pymysql = "^1.1.0"
 fitz = "^0.0.1.dev2"
 pdfplumber = "^0.10.3"
+aiofiles = "^23.2.1"
 
 [build-system]
 requires = ["poetry-core"]
