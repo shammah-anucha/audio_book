@@ -8,9 +8,10 @@ class Settings(BaseSettings):
     SECRET_KEY = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 8
-  
+#   myaudiobookdb.chkqwcsyk20c.us-east-2.rds.amazonaws.com
 
-    SQLALCHEMY_DATABASE_URL: Optional[str] = "mysql+pymysql://root:AkunnA25@127.0.0.1/Audio_Book"
+    # SQLALCHEMY_DATABASE_URL: Optional[str] = "mysql+pymysql://root:AkunnA25@127.0.0.1/Audio_Book"
+    SQLALCHEMY_DATABASE_URL: Optional[str] = "mysql+pymysql:://admin:AudioBook960@myaudiobookdb.chkqwcsyk20c.us-east-2.rds.amazonaws.com/myaudiobookdb"
 
 
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
