@@ -1,15 +1,13 @@
-from datetime import time, date
-
+from typing import List
 from pydantic import BaseModel
 
 
 class AudioBase(BaseModel):
-    audio_name: str
-    audio_file: str
+    audio_file: List[str]
 
 
 class AudioCreate(AudioBase):
-    name: str
+    pass
 
 
 class AudioUpdate(AudioBase):

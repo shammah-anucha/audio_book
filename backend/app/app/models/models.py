@@ -34,5 +34,4 @@ class Audio(Base):
     audio_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.user_id"))
     book_id = Column(Integer, ForeignKey("books.book_id"))
-    audio_name = Column(VARCHAR(30))
     audio_file = Column(LargeBinary)

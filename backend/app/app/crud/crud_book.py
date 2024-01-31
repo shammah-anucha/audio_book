@@ -1,11 +1,9 @@
 from typing import List
 from PyPDF2 import PdfReader
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import UploadFile, HTTPException
 from ..crud import crud_book
 from ..schemas import books
-from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from fastapi import File, UploadFile
 from .base import CRUDBase
 from ..models import models
 from ..schemas.books import BookCreate, BookUpdate
@@ -16,26 +14,15 @@ from io import BytesIO
 
 
 class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
-    def pdf_to_text(pdf_path):
-        pdf_path = "backend/app/app/api/api_v1/endpoints/The-Frog-Prince-Landscape-Book-CKF-FKB.pdf"
-        text = ''
-        with open(pdf_path, 'rb') as file:
-            pdf_reader = PdfReader(file)
-            for page_num in range(len(pdf_reader.pages)):
-                text += pdf_reader.pages[page_num].extract_text()
-        return text
+    # def pdf_to_text(pdf_path):
+    #     pdf_path = "backend/app/app/api/api_v1/endpoints/The-Frog-Prince-Landscape-Book-CKF-FKB.pdf"
+    #     text = ''
+    #     with open(pdf_path, 'rb') as file:
+    #         pdf_reader = PdfReader(file)
+    #         for page_num in range(len(pdf_reader.pages)):
+    #             text += pdf_reader.pages[page_num].extract_text()
+    #     return text
 
-
-    # def create_Book(self, db: Session, *, file: UploadFile, ) -> models.Books:
-    #     try:
-    #         content = file.file.read()
-    #         db_file = File(filename=file.filename, content=content)
-    #         db.add(db_file)
-    #         db.commit()
-    #         db.refresh(db_file)
-    #     finally:
-    #         db.close()
-    #     return db_file
     
     def create_Book(self, db: Session, obj_in: UploadFile, user_id: int):
         try:
@@ -49,7 +36,6 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
         finally:
             db.close()
 
-    
     
     def get_book_id(self, db: Session, id: int):
         return db.query(models.Books).filter(models.Books.book_id == id).first()
@@ -91,14 +77,12 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
         pdf_content = BytesIO(pdf_record[0])
 
 
-        # Use pdfplumber to extract text from the specified page
+        # Split the text
         with pdfplumber.open(pdf_content) as pdf:
             text_list = []
             step_size = 20
             # total_pages =Book.remove_extra(pdf)
             total_pages = len(pdf.pages)
-
-
 
             for start_page in range(1, total_pages, step_size):
                 end_page = min(start_page + step_size - 1, total_pages)
@@ -108,9 +92,6 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
                     page = pdf.pages[page_number - 1] 
                     text += page.extract_text()
                 text_list.append(text)
-        
-        # print(len(text_list))
-        # print(text_list)
 
                 
         return text_list
@@ -137,21 +118,6 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
 #     extract_text_from_pdf_in_db(db, pdf_id, page_number)
 #     return {"message": "Text extraction complete, check command line output."}
 
-
-
-
-
-        
-        
-        # text = ''
-        # with open(pdf_path, 'rb') as file:
-        #     pdf_reader = PdfReader(file)
-        #     # for page_num in range(len(pdf_reader.pages)):
-        #     #     text += pdf_reader.pages[page_num].extract_text()
-        # db.add(db_obj)
-        # db.commit()
-        # db.refresh(db_obj)
-        # return obj_in.book_file.filename
 
     def get_multi_Books(
         self, db: Session, *, skip: int = 0, limit: int = 100

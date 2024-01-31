@@ -2,16 +2,13 @@ from typing import List
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-
 from .base import CRUDBase
 from ..models import models
 from ..schemas.audio import AudioCreate, AudioUpdate
 from . import crud_book
 from gtts import gTTS, gTTSError
 from io import BytesIO
-import os
 import time
-from gtts.tokenizer import pre_processors
 
 class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
 
@@ -36,12 +33,20 @@ class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
                     break
         return audio_streams
 
-    def get_audio_stream(self, book_id: int, db: Session):
+    def save_audio_stream(self, book_id: int, db: Session):
         text_list = crud_book.Book.extract_text_from_pdf_in_db(book_id=book_id, db=db)
         audio_streams = Audio.create_audio_stream(text_list)
-
-        return audio_streams
-
+        user_id = db.query(models.Books.user_id).filter(models.Books.book_id == book_id).first()[0]
+        try:
+            for audio_stream in audio_streams:
+                db_file = models.Audio(user_id=user_id, book_id=book_id, audio_file=audio_stream.read())
+                print(db_file)
+                db.add(db_file)
+                db.commit()
+                db.refresh(db_file)
+        
+        finally:
+            db.close()
         
 
     def save_to_database(self, db: Session, *, obj_in: AudioCreate) -> models.Audio:

@@ -23,7 +23,6 @@ def read_Books(skip: int = 0, limit: int = 100, db: Session = Depends(deps.get_d
     return roster
 
 
-
 @router.get("/downloadbook/{book_id}")
 def download_book(book_id: int, db: Session = Depends(deps.get_db)):
     return crud_book.Book.download_book(db=db, book_id=book_id)
