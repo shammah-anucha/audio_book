@@ -1,0 +1,50 @@
+import logging
+import boto3
+from botocore.exceptions import ClientError
+import os
+from io import BytesIO
+from boto3.session import Session as Boto3Session
+import boto3
+from botocore.exceptions import NoCredentialsError
+from fastapi import UploadFile, HTTPException
+from dotenv import load_dotenv
+import os
+
+load_dotenv("backend/.env")
+
+
+
+class DB:
+    aws_access_key_id = os.getenv("aws_access_key_id")
+    aws_secret_access_key = os.getenv("aws_secret_access_key")
+    region = os.getenv("region")
+    bucket_name = os.getenv("bucket_name")
+
+
+
+
+def upload_to_s3(file: UploadFile):
+        s3_url = None  # Initialize with a default value
+        try:
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id=DB.aws_access_key_id,
+                aws_secret_access_key=DB.aws_secret_access_key,
+                region_name=DB.region
+            )
+            
+            # Upload the file
+            s3.upload_fileobj(file.file, DB.bucket_name, file.filename)
+
+            # Generate the S3 URL
+            s3_url = f'https://{DB.bucket_name}.s3.amazonaws.com/{file.filename}'
+
+        except NoCredentialsError as e:
+            print("Credentials not available")
+            # Handle the case where credentials are not available or incorrect
+            raise e
+        except Exception as e:
+            print(f"Error uploading to S3: {e}")
+            # Handle other exceptions
+
+        return s3_url
