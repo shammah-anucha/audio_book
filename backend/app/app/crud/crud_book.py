@@ -1,7 +1,7 @@
 from typing import List
 from PyPDF2 import PdfReader
 from fastapi import UploadFile, HTTPException
-from ..crud import crud_book
+# from ..crud import crud_book
 from ..schemas import books
 from sqlalchemy.orm import Session
 from .base import CRUDBase
@@ -10,24 +10,24 @@ from ..schemas.books import BookCreate, BookUpdate
 from fastapi.responses import StreamingResponse
 import pdfplumber
 from io import BytesIO
+from boto3.session import Session as Boto3Session
+import boto3
+from botocore.exceptions import NoCredentialsError
+from fastapi import UploadFile
+from .s3 import upload_to_s3, download_from_s3
+
+
 
 
 
 class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
-    # def pdf_to_text(pdf_path):
-    #     pdf_path = "backend/app/app/api/api_v1/endpoints/The-Frog-Prince-Landscape-Book-CKF-FKB.pdf"
-    #     text = ''
-    #     with open(pdf_path, 'rb') as file:
-    #         pdf_reader = PdfReader(file)
-    #         for page_num in range(len(pdf_reader.pages)):
-    #             text += pdf_reader.pages[page_num].extract_text()
-    #     return text
 
     
     def create_Book(self, db: Session, obj_in: UploadFile, user_id: int):
+
         try:
-            content = obj_in.file.read()
-            db_file = models.Books(book_name=obj_in.filename, book_file=content,user_id=user_id)
+            url = upload_to_s3(file=obj_in)
+            db_file = models.Books(book_name=obj_in.filename, book_file=url,user_id=user_id)
             print(db_file)
             db.add(db_file)
             db.commit()
@@ -42,7 +42,7 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
     
 
     def download_book(self, db: Session, book_id: int):
-        db_book = crud_book.Book.get_book_id(db=db, id=book_id)
+        db_book = Book.get_book_id(db=db, id=book_id)
         if not db_book:
             raise HTTPException(status_code=404, detail="Book not found")
         
@@ -66,15 +66,18 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
         pass
 
     def extract_text_from_pdf_in_db(self, db: Session, book_id: int):
-        # Retrieve the PDF from the database
-        pdf_record = db.query(models.Books.book_file).filter(models.Books.book_id == book_id).first()
 
-        if not pdf_record:
+        # Retrieve the PDF url from the database
+
+        pdf_url = db.query(models.Books.book_file).filter(models.Books.book_id == book_id).first()[0]
+
+        if not pdf_url:
             print("PDF not found")
             return
 
         # Get the binary content from the database
-        pdf_content = BytesIO(pdf_record[0])
+        # pdf_content = BytesIO(pdf_record[0])
+        pdf_content = download_from_s3(pdf_url)
 
 
         # Split the text
@@ -93,7 +96,7 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
                     text += page.extract_text()
                 text_list.append(text)
 
-                
+        print(text_list)
         return text_list
 
 

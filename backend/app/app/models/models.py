@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import LargeBinary, Column, Integer, ForeignKey, VARCHAR, Text
+from sqlalchemy import LargeBinary, Column, Integer, ForeignKey, VARCHAR, Text, String
 from ..db.base_class import Base
 
 
@@ -24,8 +24,8 @@ class Books(Base):
 
     book_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.user_id"),nullable=False)
-    book_name = Column(VARCHAR(80))
-    book_file = Column(LargeBinary)
+    book_name = Column(VARCHAR(80), nullable=False)
+    book_file = Column(Text, nullable=False)
 
 
 class Audio(Base):
@@ -34,4 +34,4 @@ class Audio(Base):
     audio_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.user_id"))
     book_id = Column(Integer, ForeignKey("books.book_id"))
-    audio_file = Column(LargeBinary)
+    audio_file = Column(Text, nullable=False)

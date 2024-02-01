@@ -30,9 +30,9 @@ def download_book(book_id: int, db: Session = Depends(deps.get_db)):
 
 
 # Example usage in your FastAPI endpoint
-@router.get("/extract-text/{book_id}/{page_number}")
-def extract_text_from_pdf_endpoint(book_id: int, page_number: int, db: Session = Depends(deps.get_db)):
-    crud_book.Book.extract_text_from_pdf_in_db(db=db, book_id=book_id, page_number=page_number)
+@router.get("/extract-text/{book_id}")
+def extract_text_from_pdf_endpoint(book_id: int, db: Session = Depends(deps.get_db)):
+    crud_book.Book.extract_text_from_pdf_in_db(db=db, book_id=book_id)
     return {"message": "Text extraction complete, check command line output."}
 
 @router.delete("/{book_id}")
