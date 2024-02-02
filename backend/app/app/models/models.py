@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import LargeBinary, Column, Integer, ForeignKey, VARCHAR, Text, String
 from ..db.base_class import Base

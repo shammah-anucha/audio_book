@@ -96,7 +96,6 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
                     text += page.extract_text()
                 text_list.append(text)
 
-        print(text_list)
         return text_list
 
 

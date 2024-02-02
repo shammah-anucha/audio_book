@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, File, UploadFile
-from ....crud import crud_book
+from ....crud import crud_book, s3
 from ....schemas import books
 from ....models import models
 from ... import deps
@@ -37,6 +37,7 @@ def extract_text_from_pdf_endpoint(book_id: int, db: Session = Depends(deps.get_
 
 @router.delete("/{book_id}")
 def delete_book(book_id: int, db: Session = Depends(deps.get_db)):
+    s3.delete_book_from_s3(db=db, book_id=book_id)
     db.query(models.Books).filter(models.Books.book_id == book_id).delete()
     db.commit()
     return "Delete Successful"
