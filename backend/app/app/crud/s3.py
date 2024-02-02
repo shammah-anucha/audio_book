@@ -132,28 +132,36 @@ def save_audio_to_s3(book_id: int, file_name: str, db: Session):
 
 
 def delete_audio_from_s3(audio_id: int, db: Session):
-    s3_url = db.query(models.Audio.audio_file).filter(models.Audio.audio_id == audio_id).first()
-    parts = s3_url.replace("https://", "").split("/")
-    object_key = "/".join(parts[1:])
-    try:
-        # Create an S3 client
-        s3 = boto3.client(
-            's3',
-            aws_access_key_id=DB.aws_access_key_id,
-            aws_secret_access_key=DB.aws_secret_access_key,
-            region_name=DB.region
-        )
+    s3_url = db.query(models.Audio.audio_file).filter(models.Audio.audio_id == audio_id).first()[0]
+    s3_url = json.loads(s3_url)
+    # print(s3_url)
+    
+    
+    for url in s3_url:
+        # print(url)
+        parts = url.replace("https://", "").split("/")
+        object_key = "/".join(parts[1:])
+        # print(parts)
+        # print(object_key)
+        try:
+            # Create an S3 client
+            s3 = boto3.client(
+                    's3',
+                    aws_access_key_id=DB.aws_access_key_id,
+                    aws_secret_access_key=DB.aws_secret_access_key,
+                    region_name=DB.region
+                )
 
-        # Delete the object
-        s3.delete_object(Bucket=DB.bucket_name, Key=object_key)
-        print(f"Object '{object_key}' deleted from S3 bucket '{DB.bucket_name}'.")
+            # Delete the object
+            s3.delete_object(Bucket=DB.bucket_name, Key=object_key)
+            print(f"Object '{object_key}' deleted from S3 bucket '{DB.bucket_name}'.")
 
-    except NoCredentialsError as e:
-        print("Credentials not available.")
-        raise e
-    except Exception as e:
-        print(f"Error deleting object from S3: {e}")
-        raise e
+        except NoCredentialsError as e:
+            print("Credentials not available.")
+            raise e
+        except Exception as e:
+            print(f"Error deleting object from S3: {e}")
+            raise e
 
 
 def delete_book_from_s3(book_id: int, db: Session):
