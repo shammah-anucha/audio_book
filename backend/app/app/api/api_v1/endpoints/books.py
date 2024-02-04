@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, File, UploadFile
-from ....crud import crud_book, s3
+from ....crud import crud_book
 from ....schemas import books
 from ....models import models
 from ... import deps
@@ -24,9 +24,9 @@ def read_Books(skip: int = 0, limit: int = 100, db: Session = Depends(deps.get_d
     return book
 
 
-@router.get("/downloadbook/{book_id}")
-def download_book(book_id: int, db: Session = Depends(deps.get_db)):
-    return crud_book.Book.download_book(db=db, book_id=book_id)
+# @router.get("/downloadbook/{book_id}")
+# def download_book(book_id: int, db: Session = Depends(deps.get_db)):
+#     return crud_book.Book.download_book(db=db, book_id=book_id)
 
 
 # Example usage in your FastAPI endpoint
@@ -37,8 +37,5 @@ def extract_text_from_pdf_endpoint(book_id: int, db: Session = Depends(deps.get_
 
 @router.delete("/{book_id}")
 def delete_book(book_id: int, db: Session = Depends(deps.get_db)):
-    s3.delete_book_from_s3(db=db, book_id=book_id)
-    db.query(models.Books).filter(models.Books.book_id == book_id).delete()
-    db.commit()
-    return "Delete Successful"
+    return crud_book.Book.delete_book(book_id=book_id,db=db)
 

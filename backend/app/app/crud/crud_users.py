@@ -60,12 +60,5 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
             return None
         return user
 
-# Not using his functionality for now
-    # def disabled(self, user: models.Users) -> bool:
-    #     return user.disabled
-
-    # def is_admin(self, user: models.Users) -> bool:
-    #     return user.is_admin
-
 
 user = CRUDUser(models.Users)

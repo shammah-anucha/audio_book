@@ -37,6 +37,10 @@ def read_user(user_id: int, db: Session = Depends(deps.get_db)):
 
 @router.delete("/users/{user_id}", tags=["users"])
 def delete_user(user_id: int, db: Session = Depends(deps.get_db)):
-    db.query(models.Users).filter(models.Users.user_id == user_id).delete()
-    db.commit()
-    return "Delete Successful"
+    db_user = crud_users.user.get_user_id(db, id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    else:
+        db.query(models.Users).filter(models.Users.user_id == user_id).delete()
+        db.commit()
+        return "Delete Successful"

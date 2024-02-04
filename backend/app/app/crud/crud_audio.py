@@ -5,10 +5,12 @@ from sqlalchemy.orm import Session
 from .base import CRUDBase
 from ..models import models
 from ..schemas.audio import AudioCreate, AudioUpdate
-from . import crud_book
+from fastapi import HTTPException
 from gtts import gTTS, gTTSError
 from io import BytesIO
 import time
+import json
+from .s3 import s3_audio
 
 class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
 
@@ -31,25 +33,10 @@ class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
                     # Handle other errors
                     print(f"Error: {e}")
                     break
-        print(audio_streams)
         return audio_streams
     
-
-    # def save_audio_stream(self, book_id: int, db: Session):
-    #     text_list = crud_book.Book.extract_text_from_pdf_in_db(book_id=book_id, db=db)
-    #     audio_streams = Audio.create_audio_stream(text_list)
-    #     user_id = db.query(models.Books.user_id).filter(models.Books.book_id == book_id).first()[0]
-    #     audio_url = upload_to_s3()
-    #     try:
-    #         for audio_stream in audio_streams:
-    #             db_file = models.Audio(user_id=user_id, book_id=book_id, audio_file=audio_stream.read())
-    #             print(db_file)
-    #             db.add(db_file)
-    #             db.commit()
-    #             db.refresh(db_file)
-        
-    #     finally:
-    #         db.close()
+    def get_audio_id(self, db: Session, id: int):
+        return db.query(models.Audio).filter(models.Audio.audio_id == id).first()
         
 
     def save_to_database(self, db: Session, *, obj_in: AudioCreate) -> models.Audio:
@@ -65,6 +52,13 @@ class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
     ) -> List[models.Audio]:
         return db.query(self.model).offset(skip).limit(limit).all()
     
-
+    def delete_audio(self, db: Session, audio_id: int):
+        db_audio = Audio.get_audio_id(db=db, id=audio_id)
+        if not db_audio:
+            raise HTTPException(status_code=404, detail="Audio not found")
+        s3_audio.delete_audio_from_s3(db=db, audio_id=audio_id)
+        db.query(models.Audio).filter(models.Audio.audio_id == audio_id).delete()
+        db.commit()
+        return "Delete Successful"
 
 Audio = CRUDAudio(models.Audio)

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class AudioBase(BaseModel):
-    audio_file: List[str]
+    audio_file: str
 
 
 class AudioCreate(AudioBase):
