@@ -37,7 +37,7 @@ This is an interactive API docs to test the endpoints of your Get, Post, Push an
 #### How to connect:
 On your browser, connect to the url:
 
- http://127.0.0.1:8000/docs#/
+http://127.0.0.1:8000/docs#/
 
 ## 6. Using the class DB in the s3 module:
 
