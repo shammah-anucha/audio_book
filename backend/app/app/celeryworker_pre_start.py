@@ -7,9 +7,16 @@ from backend.app.app.db.session import engine
 from backend.app.app.models import models
 from backend.app.app.crud import crud_audio
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 
-app = Celery('tasks', broker='amqps://crzdkstj:G-hUTDewvxVDPquGMVXbX6iUU_ph1Q7b@sparrow.rmq.cloudamqp.com/crzdkstj')
+load_dotenv(".env")
+
+broker = os.getenv("broker")
+
+
+app = Celery('tasks', broker=broker)
 
 
 @app.task
