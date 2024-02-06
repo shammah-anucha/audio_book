@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: c50d15d98411
+Revision ID: 1d342819c4e5
 Revises: 
-Create Date: 2024-01-16 09:51:35.458537
+Create Date: 2024-02-02 22:57:28.122538
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c50d15d98411'
+revision = '1d342819c4e5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,8 +35,8 @@ def upgrade() -> None:
     op.create_table('books',
     sa.Column('book_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('book_name', sa.VARCHAR(length=80), nullable=True),
-    sa.Column('book_file', sa.LargeBinary(), nullable=True),
+    sa.Column('book_name', sa.VARCHAR(length=80), nullable=False),
+    sa.Column('book_file', sa.Text(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
     sa.PrimaryKeyConstraint('book_id')
     )
@@ -45,8 +45,7 @@ def upgrade() -> None:
     sa.Column('audio_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('book_id', sa.Integer(), nullable=True),
-    sa.Column('audio_name', sa.VARCHAR(length=30), nullable=True),
-    sa.Column('audio_file', sa.LargeBinary(), nullable=True),
+    sa.Column('audio_file', sa.Text(), nullable=False),
     sa.ForeignKeyConstraint(['book_id'], ['books.book_id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
     sa.PrimaryKeyConstraint('audio_id')
