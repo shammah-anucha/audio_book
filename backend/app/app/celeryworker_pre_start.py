@@ -31,36 +31,3 @@ def celery_save_audio_to_s3(book_id: int, file_name: str):
         print(f"Error in celery_save_audio_to_s3: {e}")
 
 
-# class SaveResultTask(Task):
-#     name='save_result_task'
-#     def on_success(self, retval, task_id, args, kwargs):
-#         try:
-#             db = Session(bind=engine)
-#             book_id, file_name = args  # Unpack the arguments
-#             task_name = "celery_save_audio_to_s3"
-
-#             # Retrieve the actual result of the task
-#             result = app.AsyncResult(task_id)
-#             celery_task_result = result.result if result.ready() else "pending.."
-
-#             # Get necessary information from the database
-#             audio_id = db.query(models.Audio.audio_id).filter(models.Books.book_id == book_id).first()[0]
-#             user_id = db.query(models.Audio.user_id).filter(models.Books.book_id == book_id).first()[0]
-
-#             # Create a CeleryResult instance and save it to the database
-#             task_result = models.CeleryResult(
-#                 audio_id=audio_id,
-#                 user_id=user_id,
-#                 task_id=task_id,
-#                 book_id=book_id,
-#                 task_name=task_name,
-#                 result=celery_task_result,
-#                 finished_at=datetime.utcnow()
-#             )
-            
-#             db.add(task_result)
-#             db.commit()
-#         finally:
-#             db.close()
-
-
