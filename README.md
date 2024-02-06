@@ -55,3 +55,9 @@ To migrate with alembic, use the following command:
 alembic revision --autogenerate -m "initial"
 alembic upgrade head
 ```
+
+## 9. Using Celery
+
+```
+celery -A backend.app.app.celeryworker_pre_start worker --loglevel=info
+```
