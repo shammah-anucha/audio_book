@@ -59,6 +59,8 @@ alembic upgrade head
 
 ## 9. Using Celery
 
+Open another terminal and write this code.
+
 ```
 celery -A backend.app.app.celeryworker_pre_start worker --loglevel=info
 ```
