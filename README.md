@@ -39,6 +39,7 @@ On your browser, connect to the url:
 
 http://127.0.0.1:8000/docs#/
 
+
 ## 6. Using the class DB in the s3 module:
 
  Please ask the admin for the access.
