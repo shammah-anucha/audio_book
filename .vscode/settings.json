@@ -1,6 +1,10 @@
 {
     "editor.formatOnSave": true,
-    "python.formatting.provider": "black",
+    // "python.formatting.provider": "black",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+      },
     "python.analysis.extraPaths": [
         ". /Users/shammahanucha/Library/Caches/pypoetry/virtualenvs/planar2-Km57M6v4-py3.11"
     ],

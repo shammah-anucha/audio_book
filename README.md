@@ -64,3 +64,10 @@ Open another terminal and write this code.
 ```
 celery -A backend.app.app.celeryworker_pre_start worker --loglevel=info
 ```
+
+## 10. Unit testing
+
+```
+poetry run pytest -v test_crud_book.py
+
+```

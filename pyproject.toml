@@ -19,7 +19,7 @@ psycopg2 = "^2.9.3"
 fastapi-mail = "^1.1.4"
 python-dotenv = "^0.21.0"
 black = "^22.8.0"
-fastapi = "^0.83.0"
+fastapi = "^0.109.2"
 sib-api-v3-sdk = "^7.5.0"
 alembic = "^1.8.1"
 pypdf2 = "^3.0.1"
@@ -32,6 +32,9 @@ pdfplumber = "^0.10.3"
 aiofiles = "^23.2.1"
 boto3 = "^1.34.31"
 celery = "^5.3.6"
+pytest = "^8.0.0"
+anyio = "^4.2.0"
+httpx = "^0.26.0"
 
 [build-system]
 requires = ["poetry-core"]

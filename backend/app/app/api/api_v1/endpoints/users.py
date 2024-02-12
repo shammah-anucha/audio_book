@@ -9,6 +9,7 @@ from ....crud import crud_users
 
 router = APIRouter()
 
+
 # works
 @router.post("/users/", response_model=User, tags=["users"])
 def create_user(*, users_in: UserCreate, db: Session = Depends(deps.get_db)) -> Any:

@@ -7,13 +7,21 @@ from typing import List
 from sqlalchemy.orm import Session
 
 
-router = APIRouter(
-    prefix="/Books", tags=["Books"], dependencies=[Depends(deps.get_db)]
-)
+router = APIRouter(prefix="/Books", tags=["Books"], dependencies=[Depends(deps.get_db)])
+
 
 # works
-@router.post("/uploadbook", response_model=books.Book)
-def create_Book(user_id: int, file: UploadFile=File(...),  db: Session = Depends(deps.get_db)):
+@router.post("/uploadbook/", response_model=books.Book)
+def sent_book_to_s3(
+    user_id: int, file: UploadFile = File(...), db: Session = Depends(deps.get_db)
+):
+    return crud_book.Book.create_Book(db=db, obj_in=file, user_id=user_id)
+
+
+@router.post("/uploadbook/", response_model=books.Book)
+def create_Book(
+    user_id: int, file: UploadFile = File(...), db: Session = Depends(deps.get_db)
+):
     return crud_book.Book.create_Book(db=db, obj_in=file, user_id=user_id)
 
 
@@ -35,7 +43,7 @@ def extract_text_from_pdf_endpoint(book_id: int, db: Session = Depends(deps.get_
     crud_book.Book.extract_text_from_pdf_in_db(db=db, book_id=book_id)
     return {"message": "Text extraction complete, check command line output."}
 
+
 @router.delete("/{book_id}")
 def delete_book(book_id: int, db: Session = Depends(deps.get_db)):
-    return crud_book.Book.delete_book(book_id=book_id,db=db)
-
+    return crud_book.Book.delete_book(book_id=book_id, db=db)

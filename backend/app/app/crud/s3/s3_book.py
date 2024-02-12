@@ -20,34 +20,38 @@ class DB:
 
 
 s3 = boto3.client(
-        's3',
-        aws_access_key_id=DB.aws_access_key_id,
-        aws_secret_access_key=DB.aws_secret_access_key,
-        region_name=DB.region
-            )
-
+    "s3",
+    aws_access_key_id=DB.aws_access_key_id,
+    aws_secret_access_key=DB.aws_secret_access_key,
+    region_name=DB.region,
+)
 
 
 def upload_book_to_s3(file: UploadFile):
-        s3_url = None  # Initialize with a default value
-        try:
-            
-            # Upload the file
-            s3.upload_fileobj(file.file, DB.bucket_name, file.filename)
-            
+    s3_url = None  # Initialize with a default value
+    try:
 
-            # Generate the S3 URL
-            s3_url = f'https://{DB.bucket_name}.s3.amazonaws.com/{file.filename}'
+        # Upload the file
+        s3.upload_fileobj(file.file, DB.bucket_name, file.filename)
 
-        except NoCredentialsError as e:
-            print("Credentials not available")
-            # Handle the case where credentials are not available or incorrect
-            raise e
-        except Exception as e:
-            print(f"Error uploading to S3: {e}")
-            # Handle other exceptions
-
+        # Generate the S3 URL
+        s3_url = f"https://{DB.bucket_name}.s3.amazonaws.com/{file.filename}"
+        # db_file = models.S3Url(url=s3_url, user_id=user_id)
+        # db.add(db_file)
+        # db.commit()
+        # db.refresh(db_file)
         return s3_url
+
+    except NoCredentialsError as e:
+        print("Credentials not available")
+        # Handle the case where credentials are not available or incorrect
+        raise e
+    except Exception as e:
+        print(f"Error uploading to S3: {e}")
+        # Handle other exceptions
+
+    # finally:
+    #     db.close()
 
 
 def download_book_from_s3(s3_url: str):
@@ -66,9 +70,14 @@ def download_book_from_s3(s3_url: str):
     except Exception as e:
         print(f"Error downloading from S3: {e}")
         raise e
-    
+
+
 def delete_book_from_s3(book_id: int, db: Session):
-    s3_url = db.query(models.Books.book_file).filter(models.Books.book_id == book_id).first()[0]
+    s3_url = (
+        db.query(models.Books.book_file)
+        .filter(models.Books.book_id == book_id)
+        .first()[0]
+    )
     print(s3_url)
     parts = s3_url.replace("https://", "").split("/")
     object_key = "/".join(parts[1:])
@@ -83,5 +92,3 @@ def delete_book_from_s3(book_id: int, db: Session):
     except Exception as e:
         print(f"Error deleting object from S3: {e}")
         raise e
-    
-

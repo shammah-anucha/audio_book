@@ -10,7 +10,6 @@ class UserBase(BaseModel):
     Firstname: Optional[str]
     Lastname: Optional[str]
     country_of_residence: Optional[str]
-  
 
 
 # Properties to receive via API on creation
@@ -28,7 +27,6 @@ class UserInDBBase(UserBase):
     user_id: int
     book: List[Book] = []
     audio: List[Audio] = []
- 
 
     class Config:
         orm_mode = True
