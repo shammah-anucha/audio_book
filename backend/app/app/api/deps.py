@@ -10,7 +10,7 @@ from ..crud import crud_users
 from ...app.models import models
 from ..schemas.token import TokenPayload
 from ...app.core import security
-from ...app.core.config import settings
+from ....config import settings
 from ...app.db.session import SessionLocal
 
 

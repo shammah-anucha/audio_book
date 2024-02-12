@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from .....app import crud, schemas
-from .....app.core.config import settings
+from ......config import settings
 from .....app.core import security
 from .....app.api import deps
 from ....crud import crud_users
@@ -11,6 +11,7 @@ from ....schemas.token import Token
 
 
 router = APIRouter(prefix="/login", tags=["login"], dependencies=[Depends(deps.get_db)])
+
 
 # works
 @router.post("/access-token", response_model=Token)

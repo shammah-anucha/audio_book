@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from ..app.api.api_v1.api import api_router
-from ..app.core.config import settings
+from ...config import settings
 
 # main.py
 
@@ -23,4 +23,3 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
-

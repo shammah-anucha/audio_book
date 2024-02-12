@@ -2,7 +2,7 @@ from curses import echo
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from ...app.core.config import settings
+from ....config import settings
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)
