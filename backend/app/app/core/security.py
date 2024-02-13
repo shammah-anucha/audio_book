@@ -3,7 +3,7 @@ from typing import Union, Any
 from jose import jwt
 from passlib.context import CryptContext
 
-from ....config import settings
+from .config3 import settings
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
