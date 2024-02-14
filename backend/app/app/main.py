@@ -3,7 +3,7 @@ import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from ..app.api.api_v1.api import api_router
+# from ..app.api.api_v1.api import api_router
 from .core.config3 import settings
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -34,7 +34,7 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
+# app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 # works
