@@ -10,14 +10,10 @@ import os
 from pathlib import Path
 from alembic.config import Config
 
-# Load environment variables from .env file
-# env_path = Path(".") / ".env"
-# load_dotenv(dotenv_path=env_path)
+
 load_dotenv(".env")
 
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
-
-# alembic_cfg = Config()
 
 
 # this is the Alembic Config object, which provides

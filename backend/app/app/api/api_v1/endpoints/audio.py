@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.post("/audios/text_to_audio/{book_id}")
+@router.post("/text_to_audio/{book_id}")
 def text_to_audio(book_id: int, file_name: str):
     try:
         # Enqueue the Celery task
