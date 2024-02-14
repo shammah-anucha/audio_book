@@ -1,8 +1,8 @@
-"""drop s3url4
+"""initial
 
-Revision ID: a7d6b8f7e9dd
+Revision ID: e2922cefed4a
 Revises: 
-Create Date: 2024-02-12 09:24:33.947224
+Create Date: 2024-02-15 00:40:06.367680
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a7d6b8f7e9dd'
+revision = 'e2922cefed4a'
 down_revision = None
 branch_labels = None
 depends_on = None
