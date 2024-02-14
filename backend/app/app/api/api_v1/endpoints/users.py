@@ -1,23 +1,23 @@
-from fastapi import APIRouter, HTTPException, Depends
-from typing import Any, List
-from sqlalchemy.orm import Session
-from .....app.schemas.users import User, UserCreate
-from .....app.models import models
-from .....app.api import deps
-from ....crud import crud_users
+# from fastapi import APIRouter, HTTPException, Depends
+# from typing import Any, List
+# from sqlalchemy.orm import Session
+# from .....app.schemas.users import User, UserCreate
+# from .....app.models import models
+# from .....app.api import deps
+# from ....crud import crud_users
 
 
-router = APIRouter()
+# router = APIRouter()
 
 
-# works
-@router.post("/", response_model=User)
-def create_user(*, users_in: UserCreate, db: Session = Depends(deps.get_db)) -> Any:
-    """Create new user."""
-    user = crud_users.user.get_user_by_email(db, email=users_in.email)
-    if user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return crud_users.user.create(db=db, obj_in=users_in)
+# # works
+# @router.post("/", response_model=User)
+# def create_user(*, users_in: UserCreate, db: Session = Depends(deps.get_db)) -> Any:
+#     """Create new user."""
+#     user = crud_users.user.get_user_by_email(db, email=users_in.email)
+#     if user:
+#         raise HTTPException(status_code=400, detail="Email already registered")
+#     return crud_users.user.create(db=db, obj_in=users_in)
 
 
 # # works
