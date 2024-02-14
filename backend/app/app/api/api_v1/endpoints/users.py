@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 # works
-@router.post("/users/", response_model=User, tags=["users"])
+@router.post("/", response_model=User)
 def create_user(*, users_in: UserCreate, db: Session = Depends(deps.get_db)) -> Any:
     """Create new user."""
     user = crud_users.user.get_user_by_email(db, email=users_in.email)
