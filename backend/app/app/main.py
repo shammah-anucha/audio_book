@@ -9,8 +9,11 @@ from .core.config3 import settings
 # main.py
 
 
+# app = FastAPI(
+#     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
+# )
 app = FastAPI(
-    title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    title=settings.PROJECT_NAME, openapi_url="https://audio-book-api-m825.onrender.com"
 )
 
 # Set all CORS enabled origins
