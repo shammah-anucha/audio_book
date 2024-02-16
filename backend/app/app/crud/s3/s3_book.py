@@ -36,11 +36,6 @@ def upload_book_to_s3(file: UploadFile):
 
         # Generate the S3 URL
         s3_url = f"https://{DB.bucket_name}.s3.amazonaws.com/{file.filename}"
-        # db_file = models.S3Url(url=s3_url, user_id=user_id)
-        # db.add(db_file)
-        # db.commit()
-        # db.refresh(db_file)
-        return s3_url
 
     except NoCredentialsError as e:
         print("Credentials not available")
@@ -50,15 +45,13 @@ def upload_book_to_s3(file: UploadFile):
         print(f"Error uploading to S3: {e}")
         # Handle other exceptions
 
-    # finally:
-    #     db.close()
+    return s3_url
 
 
-def download_book_from_s3(s3_url: str):
+def download_object_from_s3(s3_url: str):
     # Parse the S3 URL to extract bucket name and object key
     parts = s3_url.replace("https://", "").split("/")
     object_key = "/".join(parts[1:])
-
     # Download the file from S3
     try:
         response = s3.get_object(Bucket=DB.bucket_name, Key=object_key)

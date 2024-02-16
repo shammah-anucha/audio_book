@@ -8,29 +8,44 @@ import pdfplumber
 from fastapi import UploadFile
 from .s3 import s3_book
 from . import crud_users
+import tempfile
+import os
 
 
 class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
 
     def create_Book(self, db: Session, obj_in: UploadFile, user_id: int):
+        max_file_size = 5 * 1024 * 1024
         db_user = crud_users.user.get_user_id(db, id=user_id)
+
+        # Check if the file size exceeds the limit
+        if obj_in.size > max_file_size:
+            raise HTTPException(
+                status_code=413,
+                detail="File size is too large. The Maximum File size is 5MB",
+            )
+
+        # Check if the seek operation moved the pointer to the correct position
+        # assert obj_in.tell() == 0
+
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
+
         if not obj_in.filename.lower().endswith(".pdf"):
             raise HTTPException(status_code=404, detail="Please upload PDF")
-        else:
-            try:
-                url = s3_book.upload_book_to_s3(file=obj_in)
-                db_file = models.Books(
-                    book_name=obj_in.filename, book_file=url, user_id=user_id
-                )
-                print(db_file)
-                db.add(db_file)
-                db.commit()
-                db.refresh(db_file)
-                return db_file
-            finally:
-                db.close()
+
+        try:
+            url = s3_book.upload_book_to_s3(file=obj_in)
+            db_file = models.Books(
+                book_name=obj_in.filename, book_file=url, user_id=user_id
+            )
+            print(db_file)
+            db.add(db_file)
+            db.commit()
+            db.refresh(db_file)
+            return db_file
+        finally:
+            db.close()
 
     def get_book_id(self, db: Session, id: int):
         return db.query(models.Books).filter(models.Books.book_id == id).first()
@@ -71,7 +86,8 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
 
         # Get the binary content from the database
         # pdf_content = BytesIO(pdf_record[0])
-        pdf_content = s3_book.download_book_from_s3(pdf_url)
+        # print(pdf_url)
+        pdf_content = s3_book.download_object_from_s3(pdf_url)
 
         # Split the text
         with pdfplumber.open(pdf_content) as pdf:

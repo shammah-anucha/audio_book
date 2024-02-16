@@ -6,8 +6,10 @@ from ....schemas import audio
 from ....models import models
 from typing import List
 from ....crud import crud_audio
-from ....celeryworker_pre_start import celery_save_audio_to_s3
-from fastapi import FastAPI, Depends, HTTPException
+
+# for version 2
+# from ....celeryworker_pre_start import celery_save_audio_to_s3
+from fastapi import Depends, HTTPException
 
 
 router = APIRouter(
@@ -16,22 +18,30 @@ router = APIRouter(
 
 
 @router.post("/text_to_audio/{book_id}")
-def text_to_audio(book_id: int, file_name: str):
-    try:
-        # Enqueue the Celery task
-        celery_save_audio_to_s3.delay(book_id=book_id, file_name=file_name)
-        return "Task enqueued successfully"
-    except Exception as e:
-        # Handle exceptions if needed
-        print(f"Error in text_to_audio: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+def text_to_audio(book_id: int, file_name: str, db: Session = Depends(deps.get_db)):
+    # try:
+    # Post audio streams
+    s3_audio.save_audio_to_s3(book_id=book_id, file_name=file_name, db=db)
+    return "Saved successfully"
 
 
+# except Exception as e:
+#     # Handle exceptions if needed
+#     print(f"Error in text_to_audio: {e}")
+#     raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+# for version 2
 # @router.post("/text_to_audio/{book_id}")
-# def text_to_audio(book_id: int, file_name: str, db: Session = Depends(deps.get_db)):
-#     # Post audio streams
-#     s3_audio.save_audio_to_s3(book_id=book_id, file_name=file_name, db=db)
-#     return 'Saved successfully'
+# def text_to_audio(book_id: int, file_name: str):
+#     try:
+#         # Enqueue the Celery task
+#         celery_save_audio_to_s3.delay(book_id=book_id, file_name=file_name)
+#         return "Task enqueued successfully"
+#     except Exception as e:
+#         # Handle exceptions if needed
+#         print(f"Error in text_to_audio: {e}")
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 # works

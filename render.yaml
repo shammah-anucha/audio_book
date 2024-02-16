@@ -1,14 +1,16 @@
-services:
-  - type: worker
-    name: celery-worker
-    region: amazon-web-services::eu-central-1
-    runtime: python
-    buildCommand: "poetry install"
-    startCommand: "celery -A backend.app.app.celeryworker_pre_start worker --loglevel=info"
-    autoDeploy: true
-    envVars:
-      - key: broker
-        fromService:
-          name: sparrow.rmq.cloudamqp.com
-          type: rabbitmq
-          property: connectionString
+"""For Version 2"""
+
+# services:
+#   - type: worker
+#     name: celery-worker
+#     region: amazon-web-services::eu-central-1
+#     runtime: python
+#     buildCommand: "poetry install"
+#     startCommand: "celery -A backend.app.app.celeryworker_pre_start worker --loglevel=info"
+#     autoDeploy: true
+#     envVars:
+#       - key: broker
+#         fromService:
+#           name: sparrow.rmq.cloudamqp.com
+#           type: rabbitmq
+#           property: connectionString
