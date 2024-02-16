@@ -84,9 +84,6 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
             .first()[0]
         )
 
-        # Get the binary content from the database
-        # pdf_content = BytesIO(pdf_record[0])
-        # print(pdf_url)
         pdf_content = s3_book.download_object_from_s3(pdf_url)
 
         # Split the text

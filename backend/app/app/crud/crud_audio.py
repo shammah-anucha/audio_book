@@ -66,6 +66,9 @@ class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
         return "Delete Successful"
 
     def download_and_zip_audio_files(self, db: Session, audio_id: int):
+        db_audio = Audio.get_audio_id(db=db, id=audio_id)
+        if not db_audio:
+            raise HTTPException(status_code=404, detail="Audio not found")
         try:
             audio_url = (
                 db.query(models.Audio.audio_file)
@@ -92,28 +95,6 @@ class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
             raise HTTPException(
                 status_code=500, detail=f"Error creating zip file: {str(e)}"
             )
-
-        # try:
-        #     # Create a temporary directory to store downloaded audio files
-        #     with tempfile.TemporaryDirectory() as temp_dir:
-        #         zip_file_path = os.path.join(temp_dir, "audio_files.zip")
-
-        #         # Download and save each audio file to the temporary directory
-        #         with zipfile.ZipFile(zip_file_path, 'w') as zip_file:
-        #             for link in audio_links:
-        #                 filename = os.path.basename(link)
-        #                 response = requests.get(link)
-        #                 if response.status_code != 200:
-        #                     raise HTTPException(status_code=500, detail=f"Failed to download audio file: {link}")
-        #                 audio_file_path = os.path.join(temp_dir, filename)
-        #                 with open(audio_file_path, 'wb') as audio_file:
-        #                     audio_file.write(response.content)
-        #                 zip_file.write(audio_file_path, filename)
-
-        #         return zip_file_path
-
-        # except Exception as e:
-        #     raise HTTPException(status_code=500, detail=f"Error creating zip file: {str(e)}")
 
 
 Audio = CRUDAudio(models.Audio)
