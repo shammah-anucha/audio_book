@@ -1,20 +1,31 @@
 from datetime import timedelta
-from fastapi import Depends, HTTPException, APIRouter
+from typing import Annotated, Any
+from fastapi import Depends, HTTPException, APIRouter, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from .....app import crud, schemas
 from ....core.config3 import settings
 from .....app.core import security
 from .....app.api import deps
 from ....crud import crud_users
 from ....schemas.token import Token
+from .....app.schemas.users import User, UserCreate
 
 
-router = APIRouter(prefix="/login", tags=["login"], dependencies=[Depends(deps.get_db)])
+router = APIRouter(prefix="/auth", tags=["login"], dependencies=[Depends(deps.get_db)])
 
 
 # works
-@router.post("/access-token", response_model=Token)
+@router.post("/", response_model=User)
+def create_user(*, users_in: UserCreate, db: Session = Depends(deps.get_db)) -> Any:
+    """Create new user."""
+    user = crud_users.user.get_user_by_email(db, email=users_in.email)
+    if user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return crud_users.user.create(db=db, obj_in=users_in)
+
+
+# works
+@router.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(deps.get_db)
 ):
@@ -23,11 +34,11 @@ async def login_for_access_token(
     )
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    elif crud_users.user.disabled(user):
-        raise HTTPException(status_code=400, detail="Inactive user")
+    # elif crud_users.user.disabled(user):
+    #     raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        user.user_id, expires_delta=access_token_expires
+        user.email, user.user_id, expires_delta=access_token_expires
     )
 
     return {"access_token": access_token, "token_type": "bearer"}

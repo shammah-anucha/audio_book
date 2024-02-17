@@ -1,11 +1,17 @@
-from typing import Any, Dict, Optional, Union, List
-
+from typing import Any, Dict, Optional, Union, List, Annotated
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordBearer
 
-from ..core.security import get_password_hash, verify_password
+from ..core.security import get_password_hash, verify_password, ALGORITHM
 from .base import CRUDBase
 from ..models import models
 from ..schemas.users import UserCreate, UserUpdate
+from jose import jwt, JWTError
+from ..core.config3 import settings
+
+
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
 
 class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
@@ -59,6 +65,27 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
         if not verify_password(password, user.hashed_password):
             return None
         return user
+
+    @staticmethod
+    async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
+        try:
+
+            payload = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
+            username: str = payload.get("sub")
+            user_id: int = payload.get("id")
+            # print(username)
+            # print(user_id)
+            if username is None or user_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Could not validate user.",
+                )
+            return {"username": username, "id": user_id}
+        except JWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate user.",
+            )
 
 
 user = CRUDUser(models.Users)
