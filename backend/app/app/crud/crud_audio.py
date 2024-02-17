@@ -51,24 +51,46 @@ class CRUDAudio(CRUDBase[models.Audio, AudioCreate, AudioUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    def get_multi_Audios(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[models.Audio]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+    def get_user_audio(self, db: Session, user_id: int) -> List[models.Audio]:
+        db_user_audio = (
+            db.query(models.Audio).filter(models.Audio.user_id == user_id).all()
+        )
+        return db_user_audio
 
-    def delete_audio(self, db: Session, audio_id: int):
+    """For Development"""
+    # def get_multi_Audios(
+    #     self, db: Session, *, skip: int = 0, limit: int = 100
+    # ) -> List[models.Audio]:
+    #     return db.query(self.model).offset(skip).limit(limit).all()
+
+    def delete_audio(self, db: Session, audio_id: int, user_id: int):
+        db_audio = Audio.get_audio_id(db=db, id=audio_id)
+        db_user_id = (
+            db.query(models.Audio.user_id)
+            .filter(models.Audio.audio_id == audio_id)
+            .first()[0]
+        )
+        if not db_audio:
+            raise HTTPException(status_code=404, detail="Audio not found")
+        if user_id != db_user_id:
+            raise HTTPException(status_code=404, detail="Audio does not belong to you")
+        else:
+            s3_audio.delete_audio_from_s3(db=db, audio_id=audio_id)
+            db.query(models.Audio).filter(models.Audio.audio_id == audio_id).delete()
+            db.commit()
+            return "Delete Successful"
+
+    def download_and_zip_audio_files(self, db: Session, audio_id: int, user_id: int):
         db_audio = Audio.get_audio_id(db=db, id=audio_id)
         if not db_audio:
             raise HTTPException(status_code=404, detail="Audio not found")
-        s3_audio.delete_audio_from_s3(db=db, audio_id=audio_id)
-        db.query(models.Audio).filter(models.Audio.audio_id == audio_id).delete()
-        db.commit()
-        return "Delete Successful"
-
-    def download_and_zip_audio_files(self, db: Session, audio_id: int):
-        db_audio = Audio.get_audio_id(db=db, id=audio_id)
-        if not db_audio:
-            raise HTTPException(status_code=404, detail="Audio not found")
+        db_user_id = (
+            db.query(models.Audio.user_id)
+            .filter(models.Audio.audio_id == audio_id)
+            .first()[0]
+        )
+        if user_id != db_user_id:
+            raise HTTPException(status_code=404, detail="Audio does not belong to you")
         try:
             audio_url = (
                 db.query(models.Audio.audio_file)

@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import UploadFile, HTTPException
+from typing import List, Annotated
+from fastapi import UploadFile, HTTPException, Depends
 from sqlalchemy.orm import Session
 from .base import CRUDBase
 from ..models import models
@@ -46,39 +46,6 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
             return db_file
         finally:
             db.close()
-
-    # def create_Book(self, db: Session, obj_in: UploadFile, user: ):
-    #     max_file_size = 5 * 1024 * 1024
-    #     db_user = crud_users.user.get_user_id(db, id=user_id)
-
-    #     # Check if the file size exceeds the limit
-    #     if obj_in.size > max_file_size:
-    #         raise HTTPException(
-    #             status_code=413,
-    #             detail="File size is too large. The Maximum File size is 5MB",
-    #         )
-
-    #     # Check if the seek operation moved the pointer to the correct position
-    #     # assert obj_in.tell() == 0
-
-    #     if db_user is None:
-    #         raise HTTPException(status_code=404, detail="User not found")
-
-    #     if not obj_in.filename.lower().endswith(".pdf"):
-    #         raise HTTPException(status_code=404, detail="Please upload PDF")
-
-    #     try:
-    #         url = s3_book.upload_book_to_s3(file=obj_in)
-    #         db_file = models.Books(
-    #             book_name=obj_in.filename, book_file=url, user_id=user_id
-    #         )
-    #         print(db_file)
-    #         db.add(db_file)
-    #         db.commit()
-    #         db.refresh(db_file)
-    #         return db_file
-    #     finally:
-    #         db.close()
 
     def get_book_id(self, db: Session, id: int):
         return db.query(models.Books).filter(models.Books.book_id == id).first()
@@ -158,19 +125,35 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
     #     extract_text_from_pdf_in_db(db, pdf_id, page_number)
     #     return {"message": "Text extraction complete, check command line output."}
 
-    def get_multi_Books(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[models.Books]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+    def get_user_books(self, db: Session, user_id: int) -> List[models.Books]:
+        db_user_book = (
+            db.query(models.Books).filter(models.Books.user_id == user_id).all()
+        )
+        return db_user_book
 
-    def delete_book(self, db: Session, book_id: int):
+    """For personal use"""
+    # def get_multi_Books(
+    #     self, db: Session, *, skip: int = 0, limit: int = 100
+    # ) -> List[models.Books]:
+    #     return db.query(self.model).offset(skip).limit(limit).all()
+
+    def delete_book(self, db: Session, book_id: int, user_id: int):
         db_book = Book.get_book_id(db=db, id=book_id)
+        db_user_id = (
+            db.query(models.Books.user_id)
+            .filter(models.Books.book_id == book_id)
+            .first()[0]
+        )
         if not db_book:
             raise HTTPException(status_code=404, detail="Book not found")
-        s3_book.delete_book_from_s3(db=db, book_id=book_id)
-        db.query(models.Books).filter(models.Books.book_id == book_id).delete()
-        db.commit()
-        return "Delete Successful"
+        if user_id != db_user_id:
+            raise HTTPException(status_code=404, detail="Book does not belong to you")
+
+        else:
+            s3_book.delete_book_from_s3(db=db, book_id=book_id)
+            db.query(models.Books).filter(models.Books.book_id == book_id).delete()
+            db.commit()
+            return "Delete Successful"
 
 
 Book = CRUDBook(models.Books)

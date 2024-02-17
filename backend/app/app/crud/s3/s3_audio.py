@@ -28,53 +28,58 @@ s3 = boto3.client(
 )
 
 
-def save_audio_to_s3(book_id: int, file_name: str, db: Session):
+def save_audio_to_s3(book_id: int, file_name: str, db: Session, user_id: int):
+    s3_url = []
     db_book = crud_book.Book.get_book_id(db=db, id=book_id)
     if not db_book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    s3_url = []
+    db_user_id = (
+        db.query(models.Audio.user_id)
+        .filter(models.Books.book_id == book_id)
+        .first()[0]
+    )
 
-    try:
-        # Convert text to audio
-        text_list = crud_book.Book.extract_text_from_pdf_in_db(book_id=book_id, db=db)
-        # print(text_list)
-        audio_streams = crud_audio.Audio.create_audio_stream(text_list)
-        # print(audio_streams)
-        user_id = (
-            db.query(models.Books.user_id)
-            .filter(models.Books.book_id == book_id)
-            .first()[0]
-        )
+    if user_id != db_user_id:
+        raise HTTPException(status_code=404, detail="Book does not belong to you")
+    else:
+        try:
+            # Convert text to audio
+            text_list = crud_book.Book.extract_text_from_pdf_in_db(
+                book_id=book_id, db=db
+            )
+            # print(text_list)
+            audio_streams = crud_audio.Audio.create_audio_stream(text_list)
+            # print(audio_streams)
 
-        # Upload the audio file to S3 with the specified file name
-        for i, audio_stream in enumerate(audio_streams, start=1):
-            part_file_name = f"{file_name}_part{i}.mp3"
+            # Upload the audio file to S3 with the specified file name
+            for i, audio_stream in enumerate(audio_streams, start=1):
+                part_file_name = f"{file_name}_part{i}.mp3"
 
-            # Reset the position of BytesIO to the beginning
-            audio_stream.seek(0)
-            s3.upload_fileobj(audio_stream, DB.bucket_name, part_file_name)
-            # Generate the S3 URL
-            url = f"https://{DB.bucket_name}.s3.amazonaws.com/{part_file_name}"
-            s3_url.append(url)
+                # Reset the position of BytesIO to the beginning
+                audio_stream.seek(0)
+                s3.upload_fileobj(audio_stream, DB.bucket_name, part_file_name)
+                # Generate the S3 URL
+                url = f"https://{DB.bucket_name}.s3.amazonaws.com/{part_file_name}"
+                s3_url.append(url)
 
-        audio_file_str = json.dumps(s3_url)
-        db_file = models.Audio(
-            user_id=user_id, book_id=book_id, audio_file=audio_file_str
-        )
-        print(db_file)
-        db.add(db_file)
-        db.commit()
-        db.refresh(db_file)
+            audio_file_str = json.dumps(s3_url)
+            db_file = models.Audio(
+                user_id=user_id, book_id=book_id, audio_file=audio_file_str
+            )
+            print(db_file)
+            db.add(db_file)
+            db.commit()
+            db.refresh(db_file)
 
-        return s3_url
+            return s3_url
 
-    except NoCredentialsError as e:
-        print("Credentials not available.")
-        raise e
-    except Exception as e:
-        print(f"Error uploading to S3: {e}")
-        raise e
+        except NoCredentialsError as e:
+            print("Credentials not available.")
+            raise e
+        except Exception as e:
+            print(f"Error uploading to S3: {e}")
+            raise e
 
 
 def delete_audio_from_s3(audio_id: int, db: Session):

@@ -2,13 +2,7 @@ from typing import Generator, Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from xml.dom import ValidationErr
 from jose import jwt, JWTError
-from sqlalchemy.orm import Session
-
-from ..crud import crud_users
-from ...app.models import models
-from ..schemas.token import TokenPayload
 from ...app.core import security
 from ..core.config3 import settings
 from ...app.db.session import SessionLocal
@@ -33,8 +27,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         payload = jwt.decode(token, settings.SECRET_KEY, security.ALGORITHM)
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
-        # print(username)
-        # print(user_id)
         if username is None or user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

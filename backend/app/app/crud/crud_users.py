@@ -48,10 +48,11 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
-    def get_multi_user(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[models.Users]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+    """For Personal use"""
+    # def get_multi_user(
+    #     self, db: Session, *, skip: int = 0, limit: int = 100
+    # ) -> List[models.Users]:
+    #     return db.query(self.model).offset(skip).limit(limit).all()
 
     def get_user_id(self, db: Session, id: Any):
         return db.query(models.Users).filter(models.Users.user_id == id).first()
