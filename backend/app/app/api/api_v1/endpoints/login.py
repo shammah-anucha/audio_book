@@ -11,7 +11,7 @@ from ....schemas.token import Token
 from .....app.schemas.users import User, UserCreate
 
 
-router = APIRouter(prefix="/auth", tags=["login"], dependencies=[Depends(deps.get_db)])
+router = APIRouter(prefix="/login", tags=["login"], dependencies=[Depends(deps.get_db)])
 
 
 # works
@@ -25,7 +25,7 @@ def create_user(*, users_in: UserCreate, db: Session = Depends(deps.get_db)) -> 
 
 
 # works
-@router.post("/token", response_model=Token)
+@router.post("/access-token", response_model=Token)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(deps.get_db)
 ):

@@ -47,6 +47,39 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
         finally:
             db.close()
 
+    # def create_Book(self, db: Session, obj_in: UploadFile, user: ):
+    #     max_file_size = 5 * 1024 * 1024
+    #     db_user = crud_users.user.get_user_id(db, id=user_id)
+
+    #     # Check if the file size exceeds the limit
+    #     if obj_in.size > max_file_size:
+    #         raise HTTPException(
+    #             status_code=413,
+    #             detail="File size is too large. The Maximum File size is 5MB",
+    #         )
+
+    #     # Check if the seek operation moved the pointer to the correct position
+    #     # assert obj_in.tell() == 0
+
+    #     if db_user is None:
+    #         raise HTTPException(status_code=404, detail="User not found")
+
+    #     if not obj_in.filename.lower().endswith(".pdf"):
+    #         raise HTTPException(status_code=404, detail="Please upload PDF")
+
+    #     try:
+    #         url = s3_book.upload_book_to_s3(file=obj_in)
+    #         db_file = models.Books(
+    #             book_name=obj_in.filename, book_file=url, user_id=user_id
+    #         )
+    #         print(db_file)
+    #         db.add(db_file)
+    #         db.commit()
+    #         db.refresh(db_file)
+    #         return db_file
+    #     finally:
+    #         db.close()
+
     def get_book_id(self, db: Session, id: int):
         return db.query(models.Books).filter(models.Books.book_id == id).first()
 

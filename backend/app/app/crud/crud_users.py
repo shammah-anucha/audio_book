@@ -11,7 +11,7 @@ from jose import jwt, JWTError
 from ..core.config3 import settings
 
 
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/token")
 
 
 class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
@@ -36,7 +36,7 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
         db: Session,
         *,
         db_obj: models.Users,
-        obj_in: Union[UserUpdate, Dict[str, Any]]
+        obj_in: Union[UserUpdate, Dict[str, Any]],
     ) -> models.Users:
         if isinstance(obj_in, dict):
             update_data = obj_in
@@ -65,27 +65,6 @@ class CRUDUser(CRUDBase[models.Users, UserCreate, UserUpdate]):
         if not verify_password(password, user.hashed_password):
             return None
         return user
-
-    @staticmethod
-    async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
-        try:
-
-            payload = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
-            username: str = payload.get("sub")
-            user_id: int = payload.get("id")
-            # print(username)
-            # print(user_id)
-            if username is None or user_id is None:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Could not validate user.",
-                )
-            return {"username": username, "id": user_id}
-        except JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user.",
-            )
 
 
 user = CRUDUser(models.Users)

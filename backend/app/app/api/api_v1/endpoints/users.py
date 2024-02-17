@@ -10,7 +10,7 @@ from ....crud import crud_users
 router = APIRouter()
 
 
-user_dependency = Annotated[dict, Depends(crud_users.user.get_current_user)]
+user_dependency = Annotated[dict, Depends(deps.get_current_user)]
 
 
 # works
