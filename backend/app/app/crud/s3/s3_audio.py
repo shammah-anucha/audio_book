@@ -35,7 +35,7 @@ def save_audio_to_s3(book_id: int, file_name: str, db: Session, user_id: int):
         raise HTTPException(status_code=404, detail="Book not found")
 
     db_user_id = (
-        db.query(models.Audio.user_id)
+        db.query(models.Books.user_id)
         .filter(models.Books.book_id == book_id)
         .first()[0]
     )
