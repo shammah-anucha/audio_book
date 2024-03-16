@@ -2,11 +2,12 @@ import boto3
 from io import BytesIO
 import boto3
 from botocore.exceptions import NoCredentialsError
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from dotenv import load_dotenv
 import os
 from sqlalchemy.orm import Session
 from ...models import models
+import aiohttp
 
 
 load_dotenv(".env")
@@ -46,6 +47,34 @@ def upload_book_to_s3(file: UploadFile):
         # Handle other exceptions
 
     return s3_url
+
+
+# s3_book.py
+
+
+# async def upload_book_to_s3(file: UploadFile):
+#     s3_url = None  # Initialize with a default value
+#     try:
+#         # Ensure you have aiohttp installed: pip install aiohttp
+#         async with aiohttp.ClientSession() as session:
+#             async with session.put(
+#                 f"https://{DB.bucket_name}.s3.amazonaws.com/{file.filename}",
+#                 data=await file.read(),
+#             ) as response:
+#                 if response.status != 200:
+#                     # Handle the error here if needed
+#                     raise HTTPException(
+#                         status_code=response.status, detail="Failed to upload to S3"
+#                     )
+
+#                 # Generate the S3 URL
+#                 s3_url = f"https://{DB.bucket_name}.s3.amazonaws.com/{file.filename}"
+
+#     except Exception as e:
+#         print(f"Error uploading to S3: {e}")
+#         # Handle other exceptions
+
+#     return s3_url
 
 
 def download_object_from_s3(s3_url: str):

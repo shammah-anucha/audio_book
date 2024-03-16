@@ -8,6 +8,7 @@ import pdfplumber
 from fastapi import UploadFile
 from .s3 import s3_book
 from . import crud_users
+from .pdf_to_image import convert_pdf_to_image
 import tempfile
 import os
 
@@ -15,6 +16,8 @@ import os
 class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
 
     def create_Book(self, db: Session, obj_in: UploadFile, user_id: int):
+        image = convert_pdf_to_image(file=obj_in)
+        # print(image)
         max_file_size = 5 * 1024 * 1024
         db_user = crud_users.user.get_user_id(db, id=user_id)
 
@@ -35,11 +38,16 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
             raise HTTPException(status_code=404, detail="Please upload PDF")
 
         try:
+            obj_in.file.seek(0)
             url = s3_book.upload_book_to_s3(file=obj_in)
+            # url = "test"
+
             db_file = models.Books(
-                book_name=obj_in.filename, book_file=url, user_id=user_id
+                book_name=obj_in.filename,
+                book_file=url,
+                user_id=user_id,
+                book_image=image,
             )
-            print(db_file)
             db.add(db_file)
             db.commit()
             db.refresh(db_file)

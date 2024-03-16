@@ -33,6 +33,7 @@ class Books(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     book_name = Column(VARCHAR(80), nullable=False)
     book_file = Column(Text, nullable=False)
+    book_image = Column(Text)
 
 
 class Audio(Base):
