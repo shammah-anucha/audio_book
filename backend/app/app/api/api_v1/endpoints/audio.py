@@ -24,7 +24,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 def text_to_audio(
     current_user: user_dependency,
     book_id: int,
-    file_name: str,
+    audio_name: str,
     db: Session = Depends(deps.get_db),
 ):
     if current_user is None:
@@ -33,7 +33,7 @@ def text_to_audio(
 
     # Post audio streams
     s3_audio.save_audio_to_s3(
-        book_id=book_id, file_name=file_name, db=db, user_id=current_user["id"]
+        book_id=book_id, audio_name=audio_name, db=db, user_id=current_user["id"]
     )
     return "Saved successfully"
 

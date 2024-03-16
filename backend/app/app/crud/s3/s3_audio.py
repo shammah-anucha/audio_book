@@ -28,7 +28,7 @@ s3 = boto3.client(
 )
 
 
-def save_audio_to_s3(book_id: int, file_name: str, db: Session, user_id: int):
+def save_audio_to_s3(book_id: int, audio_name: str, db: Session, user_id: int):
     s3_url = []
     db_book = crud_book.Book.get_book_id(db=db, id=book_id)
     if not db_book:
@@ -54,7 +54,7 @@ def save_audio_to_s3(book_id: int, file_name: str, db: Session, user_id: int):
 
             # Upload the audio file to S3 with the specified file name
             for i, audio_stream in enumerate(audio_streams, start=1):
-                part_file_name = f"{file_name}_part{i}.mp3"
+                part_file_name = f"{audio_name}_part{i}.mp3"
 
                 # Reset the position of BytesIO to the beginning
                 audio_stream.seek(0)
@@ -65,7 +65,10 @@ def save_audio_to_s3(book_id: int, file_name: str, db: Session, user_id: int):
 
             audio_file_str = json.dumps(s3_url)
             db_file = models.Audio(
-                user_id=user_id, book_id=book_id, audio_file=audio_file_str
+                user_id=user_id,
+                book_id=book_id,
+                audio_file=audio_file_str,
+                audio_name=audio_name,
             )
             print(db_file)
             db.add(db_file)

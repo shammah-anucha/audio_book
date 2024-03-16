@@ -159,7 +159,10 @@ class CRUDBook(CRUDBase[models.Books, BookCreate, BookUpdate]):
 
         else:
             s3_book.delete_book_from_s3(db=db, book_id=book_id)
+            print("problem 1")
             db.query(models.Books).filter(models.Books.book_id == book_id).delete()
+            print("problem 2")
+
             db.commit()
             return "Delete Successful"
 

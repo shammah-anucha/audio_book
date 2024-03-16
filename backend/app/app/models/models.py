@@ -40,6 +40,7 @@ class Audio(Base):
     __tablename__ = "audio"
 
     audio_id = Column(Integer, primary_key=True, index=True)
+    audio_name = Column(Text)
     user_id = Column(Integer, ForeignKey("users.user_id"))
     book_id = Column(Integer, ForeignKey("books.book_id"))
     audio_file = Column(Text, nullable=False)

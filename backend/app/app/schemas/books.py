@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from fastapi import UploadFile
+from typing import Optional
 
 
 class BookBase(BaseModel):
@@ -20,7 +21,7 @@ class BookInDBBase(BaseModel):
     book_id: int
     book_name: str
     book_file: str
-    book_image: str
+    book_image: Optional[str]
 
     class Config:
         orm_mode = True
